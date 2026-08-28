@@ -1,0 +1,10 @@
+# Visual Studio
+.vs/
+
+# Fichiers générés par .NET
+bin/
+obj/
+
+# Fichiers utilisateur Visual Studio
+*.user
+*.suo
