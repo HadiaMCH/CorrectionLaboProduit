@@ -1,44 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 
-// ================================================================
+// ============================================================================
 // CLASSE MÈRE : Produit
-// ================================================================
+// ============================================================================
 //
-// Produit contient tout ce qui est COMMUN
-// à tous les produits du magasin.
+// Cette classe contient les informations communes à tous les produits.
 //
-// Les sous-classes vont hériter de cette classe.
-// ================================================================
+// Les notions du bloc 3 restent présentes :
+// - héritage
+// - virtual / override
+// - polymorphisme
+//
+// Le bloc 4 ajoutera les collections autour de ces objets.
+// ============================================================================
 
 public class Produit
 {
-    // ------------------------------------------------------------
-    // CHAMPS PRIVÉS
-    // ------------------------------------------------------------
-
+    private string code = string.Empty;
     private string nom = string.Empty;
     private double prix;
     private int quantite;
 
-
-    // ------------------------------------------------------------
-    // MEMBRE STATIC
-    // ------------------------------------------------------------
-    //
-    // Ce compteur est partagé par Produit
-    // ET toutes ses sous-classes.
-
+    // Compteur partagé par Produit et toutes ses sous-classes.
     public static int NbProduits { get; private set; }
 
 
-    // ------------------------------------------------------------
-    // CONSTRUCTEUR DE Produit
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // CONSTRUCTEUR
+    // ------------------------------------------------------------------------
 
-    public Produit(string nom, double prix, int quantite)
+    public Produit(
+        string code,
+        string nom,
+        double prix,
+        int quantite
+    )
     {
-        // On passe par les propriétés
-        // afin d'utiliser leurs validations.
+        Code = code;
         Nom = nom;
         Prix = prix;
         Quantite = quantite;
@@ -47,9 +46,37 @@ public class Produit
     }
 
 
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // PROPRIÉTÉ Code
+    // ------------------------------------------------------------------------
+    //
+    // Le code servira de clé dans le Dictionary
+    // et de valeur unique dans le HashSet.
+
+    public string Code
+    {
+        get
+        {
+            return code;
+        }
+
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException(
+                    "Le code du produit ne peut pas être vide."
+                );
+            }
+
+            code = value;
+        }
+    }
+
+
+    // ------------------------------------------------------------------------
     // PROPRIÉTÉ Nom
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     public string Nom
     {
@@ -72,9 +99,9 @@ public class Produit
     }
 
 
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // PROPRIÉTÉ Prix
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     public double Prix
     {
@@ -97,9 +124,9 @@ public class Produit
     }
 
 
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // PROPRIÉTÉ Quantite
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     public int Quantite
     {
@@ -122,9 +149,9 @@ public class Produit
     }
 
 
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // MÉTHODE COMMUNE
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
     public double ValeurStock()
     {
@@ -132,17 +159,15 @@ public class Produit
     }
 
 
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // MÉTHODE VIRTUAL
-    // ------------------------------------------------------------
+    // ------------------------------------------------------------------------
     //
-    // virtual signifie :
-    //
-    // "Produit possède une version de Afficher(),
-    // mais une sous-classe pourra la redéfinir."
+    // Les sous-classes pourront redéfinir cette méthode.
 
     public virtual void Afficher()
     {
+        Console.WriteLine($"Code            : {Code}");
         Console.WriteLine($"Nom             : {Nom}");
         Console.WriteLine($"Prix            : {Prix:F2} $");
         Console.WriteLine($"Quantité        : {Quantite}");
@@ -150,42 +175,48 @@ public class Produit
             $"Valeur du stock : {ValeurStock():F2} $"
         );
     }
+
+
+    // ------------------------------------------------------------------------
+    // TOSTRING
+    // ------------------------------------------------------------------------
+    //
+    // Permet d'obtenir un affichage utile lorsqu'on fait :
+    //
+    // Console.WriteLine(produit);
+
+    public override string ToString()
+    {
+        return $"{Code} - {Nom} - {Prix:F2} $ - quantité : {Quantite}";
+    }
 }
 
 
-// ================================================================
+// ============================================================================
 // SOUS-CLASSE : ProduitElectronique
-// ================================================================
-//
-// Relation :
-//
-// ProduitElectronique EST UN Produit.
-//
-// ProduitElectronique hérite donc de Produit.
-// ================================================================
+// ============================================================================
 
 public class ProduitElectronique : Produit
 {
-    // Information spécifique aux produits électroniques.
     private int garantieMois;
 
 
-    // ------------------------------------------------------------
-    // CONSTRUCTEUR
-    // ------------------------------------------------------------
-
     public ProduitElectronique(
+        string code,
         string nom,
         double prix,
         int quantite,
         int garantieMois
     )
-        : base(nom, prix, quantite)
+        : base(code, nom, prix, quantite)
     {
-        // base(...) appelle le constructeur de Produit.
+        if (garantieMois < 0)
+        {
+            throw new ArgumentException(
+                "La garantie ne peut pas être négative."
+            );
+        }
 
-        // Ensuite, ProduitElectronique initialise
-        // sa propre information.
         this.garantieMois = garantieMois;
     }
 
@@ -199,45 +230,23 @@ public class ProduitElectronique : Produit
     }
 
 
-    // ------------------------------------------------------------
-    // OVERRIDE
-    // ------------------------------------------------------------
-    //
-    // override remplace la version générale
-    // de Afficher() pour ProduitElectronique.
-
     public override void Afficher()
     {
-        // Appeler d'abord la version commune.
+        // Réutilisation de l'affichage commun.
         base.Afficher();
 
-        // Puis ajouter ce qui est spécifique.
+        // Information spécifique.
         Console.WriteLine("Type            : Électronique");
         Console.WriteLine(
-            $"Garantie        : {garantieMois} mois"
-        );
-    }
-
-
-    // Méthode uniquement disponible
-    // pour ProduitElectronique.
-    public void AfficherGarantie()
-    {
-        Console.WriteLine(
-            $"Garantie de {Nom} : {garantieMois} mois."
+            $"Garantie        : {GarantieMois} mois"
         );
     }
 }
 
 
-// ================================================================
+// ============================================================================
 // SOUS-CLASSE : ProduitAlimentaire
-// ================================================================
-//
-// ProduitAlimentaire EST UN Produit.
-//
-// Il ajoute une date d'expiration.
-// ================================================================
+// ============================================================================
 
 public class ProduitAlimentaire : Produit
 {
@@ -245,12 +254,13 @@ public class ProduitAlimentaire : Produit
 
 
     public ProduitAlimentaire(
+        string code,
         string nom,
         double prix,
         int quantite,
         DateTime expiration
     )
-        : base(nom, prix, quantite)
+        : base(code, nom, prix, quantite)
     {
         this.expiration = expiration;
     }
@@ -267,49 +277,41 @@ public class ProduitAlimentaire : Produit
 
     public override void Afficher()
     {
-        // Réutiliser l'affichage commun.
         base.Afficher();
 
-        // Ajouter l'information spécifique.
         Console.WriteLine("Type            : Alimentaire");
-
         Console.WriteLine(
-            $"Expiration      : {expiration:yyyy-MM-dd}"
+            $"Expiration      : {Expiration:yyyy-MM-dd}"
         );
-    }
-
-
-    public bool EstExpire(DateTime date)
-    {
-        return expiration.Date < date.Date;
     }
 }
 
 
-// ================================================================
+// ============================================================================
 // SOUS-CLASSE : ProduitLivre
-// ================================================================
-//
-// Cette troisième sous-classe sert à démontrer
-// un avantage important du polymorphisme.
-//
-// On peut ajouter un nouveau type de Produit
-// sans réécrire la boucle foreach.
-// ================================================================
+// ============================================================================
 
 public class ProduitLivre : Produit
 {
-    private string auteur;
+    private string auteur = string.Empty;
 
 
     public ProduitLivre(
+        string code,
         string nom,
         double prix,
         int quantite,
         string auteur
     )
-        : base(nom, prix, quantite)
+        : base(code, nom, prix, quantite)
     {
+        if (string.IsNullOrWhiteSpace(auteur))
+        {
+            throw new ArgumentException(
+                "L'auteur ne peut pas être vide."
+            );
+        }
+
         this.auteur = auteur;
     }
 
@@ -328,484 +330,795 @@ public class ProduitLivre : Produit
         base.Afficher();
 
         Console.WriteLine("Type            : Livre");
-        Console.WriteLine($"Auteur          : {auteur}");
+        Console.WriteLine($"Auteur          : {Auteur}");
     }
 }
 
 
-// ================================================================
+// ============================================================================
+// CLASSE GestionInventaire
+// ============================================================================
+//
+// Cette classe montre que plusieurs collections peuvent travailler ensemble.
+//
+// List<Produit>
+//     -> parcourir tous les produits.
+//
+// Dictionary<string, Produit>
+//     -> retrouver rapidement un produit avec son code.
+//
+// HashSet<string>
+//     -> empêcher les codes en doublon.
+//
+// Stack<Produit>
+//     -> annuler le dernier ajout.
+//
+// Queue<Produit>
+//     -> gérer une file de réapprovisionnement.
+// ============================================================================
+
+public class GestionInventaire
+{
+    // ------------------------------------------------------------------------
+    // LIST
+    // ------------------------------------------------------------------------
+
+    private List<Produit> produits =
+        new List<Produit>();
+
+
+    // ------------------------------------------------------------------------
+    // DICTIONARY
+    // ------------------------------------------------------------------------
+
+    private Dictionary<string, Produit> produitsParCode =
+        new Dictionary<string, Produit>();
+
+
+    // ------------------------------------------------------------------------
+    // HASHSET
+    // ------------------------------------------------------------------------
+
+    private HashSet<string> codes =
+        new HashSet<string>();
+
+
+    // ------------------------------------------------------------------------
+    // STACK
+    // ------------------------------------------------------------------------
+
+    private Stack<Produit> historiqueAjouts =
+        new Stack<Produit>();
+
+
+    // ------------------------------------------------------------------------
+    // QUEUE
+    // ------------------------------------------------------------------------
+
+    private Queue<Produit> fileReapprovisionnement =
+        new Queue<Produit>();
+
+
+    // ------------------------------------------------------------------------
+    // IEnumerable<Produit>
+    // ------------------------------------------------------------------------
+    //
+    // Le programme extérieur peut parcourir les produits,
+    // mais il ne reçoit pas directement la List privée.
+
+    public IEnumerable<Produit> Produits
+    {
+        get
+        {
+            return produits;
+        }
+    }
+
+
+    public IEnumerable<string> Codes
+    {
+        get
+        {
+            return codes;
+        }
+    }
+
+
+    // ------------------------------------------------------------------------
+    // AJOUTER UN PRODUIT
+    // ------------------------------------------------------------------------
+
+    public bool Ajouter(Produit produit)
+    {
+        /*
+         * On commence par le HashSet.
+         *
+         * Add retourne :
+         *
+         * true  -> le code est nouveau
+         * false -> le code existe déjà
+         */
+
+        bool codeNouveau = codes.Add(produit.Code);
+
+        if (!codeNouveau)
+        {
+            return false;
+        }
+
+
+        // Le produit est ajouté à la List
+        // pour pouvoir être parcouru.
+        produits.Add(produit);
+
+
+        // Le produit est ajouté au Dictionary
+        // pour permettre la recherche par code.
+        produitsParCode[produit.Code] = produit;
+
+
+        // On mémorise le dernier ajout
+        // pour pouvoir l'annuler.
+        historiqueAjouts.Push(produit);
+
+
+        return true;
+    }
+
+
+    // ------------------------------------------------------------------------
+    // RECHERCHER AVEC DICTIONARY
+    // ------------------------------------------------------------------------
+
+    public Produit? ChercherParCode(string code)
+    {
+        /*
+         * On vérifie la présence de la clé
+         * avant d'utiliser produitsParCode[code].
+         */
+
+        if (produitsParCode.ContainsKey(code))
+        {
+            return produitsParCode[code];
+        }
+
+        return null;
+    }
+
+
+    // ------------------------------------------------------------------------
+    // AFFICHER TOUS
+    // ------------------------------------------------------------------------
+
+    public void AfficherTous()
+    {
+        foreach (Produit produit in produits)
+        {
+            Console.WriteLine();
+            Console.WriteLine("----------------------------------------");
+
+            /*
+             * Le tableau n'est pas nécessaire.
+             *
+             * La List<Produit> peut contenir :
+             *
+             * ProduitElectronique
+             * ProduitAlimentaire
+             * ProduitLivre
+             *
+             * Grâce au polymorphisme.
+             */
+
+            produit.Afficher();
+        }
+    }
+
+
+    // ------------------------------------------------------------------------
+    // FILTRER LES PRODUITS
+    // ------------------------------------------------------------------------
+
+    public void AfficherStockFaible(int seuil)
+    {
+        foreach (Produit produit in produits)
+        {
+            // foreach visite tous les produits.
+            //
+            // if décide lesquels afficher.
+
+            if (produit.Quantite <= seuil)
+            {
+                Console.WriteLine(produit);
+            }
+        }
+    }
+
+
+    // ------------------------------------------------------------------------
+    // STACK : ANNULER LE DERNIER AJOUT
+    // ------------------------------------------------------------------------
+
+    public Produit? AnnulerDernierAjout()
+    {
+        if (historiqueAjouts.Count == 0)
+        {
+            return null;
+        }
+
+
+        // Pop retire le dernier produit ajouté.
+        Produit produit = historiqueAjouts.Pop();
+
+
+        // Important :
+        // il faut supprimer ce produit de toutes
+        // les collections principales.
+
+        produits.Remove(produit);
+
+        produitsParCode.Remove(produit.Code);
+
+        codes.Remove(produit.Code);
+
+
+        return produit;
+    }
+
+
+    // ------------------------------------------------------------------------
+    // QUEUE : AJOUTER À LA FILE DE RÉAPPROVISIONNEMENT
+    // ------------------------------------------------------------------------
+
+    public bool AjouterAFileReapprovisionnement(string code)
+    {
+        Produit? produit = ChercherParCode(code);
+
+
+        if (produit == null)
+        {
+            return false;
+        }
+
+
+        // Enqueue ajoute à la fin de la file.
+        fileReapprovisionnement.Enqueue(produit);
+
+
+        return true;
+    }
+
+
+    // ------------------------------------------------------------------------
+    // QUEUE : TRAITER LE PREMIER PRODUIT
+    // ------------------------------------------------------------------------
+
+    public Produit? TraiterProchainReapprovisionnement()
+    {
+        if (fileReapprovisionnement.Count == 0)
+        {
+            return null;
+        }
+
+
+        // Dequeue retire le premier élément.
+        return fileReapprovisionnement.Dequeue();
+    }
+}
+
+
+// ============================================================================
 // PROGRAMME PRINCIPAL
-// ================================================================
+// ============================================================================
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        // ========================================================
-        // TEST 1 - CRÉATION D'UN PRODUIT
-        // ========================================================
-
-        Titre("TEST 1 - Produit général");
-
-        Produit p1 = new Produit(
-            "Cahier",
-            4.99,
-            10
-        );
-
-        p1.Afficher();
-
-        Console.WriteLine(
-            $"Nombre de produits : {Produit.NbProduits}"
-        );
+        Titre("LABO - COLLECTIONS ET GÉNÉRIQUES");
 
 
-        // ========================================================
-        // TEST 2 - CRÉATION DES SOUS-CLASSES
-        // ========================================================
+        GestionInventaire inventaire =
+            new GestionInventaire();
 
-        Titre("TEST 2 - Sous-classes");
 
-        ProduitElectronique electronique =
+        // ====================================================================
+        // TEST 1 - CRÉATION DES PRODUITS
+        // ====================================================================
+
+        Titre("TEST 1 - Création des produits");
+
+
+        ProduitElectronique ecouteurs =
             new ProduitElectronique(
+                "E001",
                 "Écouteurs",
                 79.99,
                 8,
                 24
             );
 
-        ProduitAlimentaire alimentaire =
+
+        ProduitAlimentaire yogourt =
             new ProduitAlimentaire(
+                "A001",
                 "Yogourt",
                 3.99,
-                20,
+                3,
                 new DateTime(2026, 9, 15)
             );
 
+
         ProduitLivre livre =
             new ProduitLivre(
+                "L001",
                 "Clean Code",
                 49.95,
-                4,
+                2,
                 "Robert C. Martin"
             );
 
 
-        electronique.Afficher();
-
-        Console.WriteLine();
-
-        alimentaire.Afficher();
-
-        Console.WriteLine();
-
-        livre.Afficher();
-
-
-        // ========================================================
-        // TEST 3 - STATIC ET HÉRITAGE
-        // ========================================================
-
-        Titre("TEST 3 - static");
-
-        Console.WriteLine(
-            $"Nombre total de produits créés : {Produit.NbProduits}"
-        );
-
-        /*
-         * Résultat attendu :
-         *
-         * 4
-         *
-         * 1 Produit
-         * 1 ProduitElectronique
-         * 1 ProduitAlimentaire
-         * 1 ProduitLivre
-         *
-         * Le compteur appartient à Produit
-         * mais il est partagé avec toutes les sous-classes.
-         */
-
-
-        // ========================================================
-        // TEST 4 - RÉFÉRENCE PARENT / OBJET ENFANT
-        // ========================================================
-
-        Titre("TEST 4 - Type déclaré et type réel");
-
-
-        // TYPE DÉCLARÉ :
-        // Produit
-        //
-        // TYPE RÉEL :
-        // ProduitElectronique
-
-        Produit produit = electronique;
-
-
-        Console.WriteLine(
-            "Type déclaré : Produit"
-        );
-
-        Console.WriteLine(
-            $"Type réel    : {produit.GetType().Name}"
-        );
-
-
-        // IMPORTANT :
-        //
-        // La variable est Produit,
-        // mais l'objet réel est ProduitElectronique.
-
-        produit.Afficher();
-
-
-        /*
-         * Quelle méthode Afficher() est appelée ?
-         *
-         * ProduitElectronique.Afficher()
-         *
-         * Pourquoi ?
-         *
-         * Parce que :
-         *
-         * Produit.Afficher()
-         * est virtual
-         *
-         * et
-         *
-         * ProduitElectronique.Afficher()
-         * est override.
-         *
-         * C# regarde donc le TYPE RÉEL de l'objet.
-         */
-
-
-        // ========================================================
-        // TEST 5 - POLYMORPHISME
-        // ========================================================
-
-        Titre("TEST 5 - Polymorphisme");
-
-
-        // Le tableau est de type Produit[].
-        //
-        // Pourtant, les objets à l'intérieur
-        // sont de types différents.
-
-        Produit[] inventaire =
-        {
-            electronique,
-            alimentaire,
-            livre
-        };
-
-
-        foreach (Produit item in inventaire)
-        {
-            Console.WriteLine();
-
-            Console.WriteLine("----------------------------");
-
-            // Toujours le même appel.
-            item.Afficher();
-        }
-
-
-        /*
-         * C'est ici qu'on voit le polymorphisme.
-         *
-         * La boucle écrit toujours :
-         *
-         * item.Afficher();
-         *
-         * Pourtant :
-         *
-         * ProduitElectronique
-         * -> appelle Afficher électronique
-         *
-         * ProduitAlimentaire
-         * -> appelle Afficher alimentaire
-         *
-         * ProduitLivre
-         * -> appelle Afficher livre
-         */
-
-
-        // ========================================================
-        // TEST 6 - CONTRE-CAS
-        // ========================================================
-
-        Titre("TEST 6 - Pourquoi éviter les if");
-
-
-        Console.WriteLine(
-            "On pourrait tester chaque type avec des if..."
-        );
-
-        Console.WriteLine();
-
-        /*
-         * MAUVAISE APPROCHE POUR Afficher() :
-         *
-         * foreach (Produit item in inventaire)
-         * {
-         *     if (item is ProduitElectronique)
-         *     {
-         *         ...
-         *     }
-         *     else if (item is ProduitAlimentaire)
-         *     {
-         *         ...
-         *     }
-         *     else if (item is ProduitLivre)
-         *     {
-         *         ...
-         *     }
-         * }
-         *
-         * Pourquoi c'est mauvais ici ?
-         *
-         * Parce que chaque fois qu'on ajoute une nouvelle sous-classe,
-         * il faut modifier cette boucle.
-         *
-         * Le polymorphisme permet plutôt :
-         *
-         * item.Afficher();
-         */
-
-
-        foreach (Produit item in inventaire)
-        {
-            item.Afficher();
-            Console.WriteLine();
-        }
-
-
-        // ========================================================
-        // TEST 7 - is POUR UN BESOIN SPÉCIAL
-        // ========================================================
-
-        Titre("TEST 7 - is pour un cas spécial");
-
-
-        foreach (Produit item in inventaire)
-        {
-            /*
-             * Afficher() ne nécessite PAS de is.
-             *
-             * Mais imaginons que nous voulions appeler
-             * AfficherGarantie().
-             *
-             * Cette méthode existe seulement
-             * dans ProduitElectronique.
-             */
-
-            if (item is ProduitElectronique e)
-            {
-                e.AfficherGarantie();
-            }
-        }
-
-
-        // ========================================================
-        // TEST 8 - as ET CONVERSION
-        // ========================================================
-
-        Titre("TEST 8 - as");
-
-
-        Produit produitGeneral = alimentaire;
-
-
-        // On essaie de convertir un ProduitAlimentaire
-        // en ProduitElectronique.
-        //
-        // Cette conversion est impossible.
-
-        ProduitElectronique? e2 =
-            produitGeneral as ProduitElectronique;
-
-
-        if (e2 == null)
-        {
-            Console.WriteLine(
-                "Conversion impossible."
-            );
-
-            Console.WriteLine(
-                "L'objet réel est un ProduitAlimentaire."
-            );
-        }
-
-
-        /*
-         * Tous les ProduitElectronique sont des Produit.
-         *
-         * MAIS
-         *
-         * tous les Produit ne sont pas
-         * des ProduitElectronique.
-         */
-
-
-        // ========================================================
-        // TEST 9 - COPIE DE RÉFÉRENCE
-        // ========================================================
-
-        Titre("TEST 9 - Copie de référence");
-
-
-        Produit reference1 = electronique;
-
-        Produit reference2 = reference1;
-
-
-        // Les deux variables pointent vers le même objet.
-
-        reference2.Quantite = 2;
-
-
-        Console.WriteLine(
-            $"Quantité avec reference1 : {reference1.Quantite}"
-        );
-
-        Console.WriteLine(
-            $"Quantité avec reference2 : {reference2.Quantite}"
-        );
-
-        Console.WriteLine(
-            $"Quantité avec electronique : {electronique.Quantite}"
-        );
-
-
-        /*
-         * Résultat :
-         *
-         * 2
-         * 2
-         * 2
-         *
-         * Pourquoi ?
-         *
-         * reference2 = reference1
-         *
-         * ne copie pas l'objet.
-         *
-         * Cela copie la référence.
-         */
-
-
-        // ========================================================
-        // TEST 10 - VALIDATION HÉRITÉE
-        // ========================================================
-
-        Titre("TEST 10 - Validation héritée");
-
-
-        try
-        {
-            ProduitElectronique invalide =
-                new ProduitElectronique(
-                    "",
-                    100,
-                    5,
-                    12
-                );
-        }
-        catch (ArgumentException erreur)
-        {
-            Console.WriteLine(
-                $"Erreur détectée : {erreur.Message}"
-            );
-        }
-
-
-        /*
-         * ProduitElectronique appelle :
-         *
-         * base(nom, prix, quantite)
-         *
-         * Donc les validations de Produit
-         * sont aussi utilisées lorsque nous créons
-         * un ProduitElectronique.
-         */
-
-
-        // ========================================================
-        // TEST 11 - AJOUTER UNE NOUVELLE SOUS-CLASSE
-        // ========================================================
-
-        Titre("TEST 11 - Extensibilité");
-
-
-        Console.WriteLine(
-            "Nous avons ajouté ProduitLivre."
-        );
-
-        Console.WriteLine(
-            "Pourtant, la boucle polymorphe n'a pas changé."
-        );
-
-
-        Produit[] inventaire2 =
-        {
+        ProduitElectronique clavier =
             new ProduitElectronique(
-                "Télévision",
-                899.99,
-                3,
+                "E002",
+                "Clavier",
+                129.99,
+                12,
                 36
-            ),
+            );
 
-            new ProduitAlimentaire(
-                "Lait",
-                4.49,
-                15,
-                new DateTime(2026, 9, 20)
-            ),
 
+        Console.WriteLine(
+            $"Nombre d'objets Produit créés : {Produit.NbProduits}"
+        );
+
+
+        // ====================================================================
+        // TEST 2 - AJOUT DANS LES COLLECTIONS
+        // ====================================================================
+
+        Titre("TEST 2 - Ajouter les produits");
+
+
+        AjouterEtAfficherResultat(
+            inventaire,
+            ecouteurs
+        );
+
+
+        AjouterEtAfficherResultat(
+            inventaire,
+            yogourt
+        );
+
+
+        AjouterEtAfficherResultat(
+            inventaire,
+            livre
+        );
+
+
+        AjouterEtAfficherResultat(
+            inventaire,
+            clavier
+        );
+
+
+        // ====================================================================
+        // TEST 3 - HASHSET ET DOUBLON
+        // ====================================================================
+
+        Titre("TEST 3 - Refuser un doublon");
+
+
+        bool ajouteEncore =
+            inventaire.Ajouter(ecouteurs);
+
+
+        if (ajouteEncore)
+        {
+            Console.WriteLine(
+                "Le produit a été ajouté."
+            );
+        }
+        else
+        {
+            Console.WriteLine(
+                "Ajout refusé : le code E001 existe déjà."
+            );
+        }
+
+
+        /*
+         * Le HashSet protège ici l'unicité.
+         *
+         * E001 existe déjà.
+         *
+         * codes.Add("E001")
+         *
+         * retourne donc false.
+         */
+
+
+        // ====================================================================
+        // TEST 4 - LIST + FOREACH + POLYMORPHISME
+        // ====================================================================
+
+        Titre("TEST 4 - Parcourir la List");
+
+
+        inventaire.AfficherTous();
+
+
+        /*
+         * List<Produit> contient des objets
+         * de types différents.
+         *
+         * Pourtant, le foreach utilise toujours :
+         *
+         * produit.Afficher();
+         *
+         * ProduitElectronique -> version électronique
+         * ProduitAlimentaire  -> version alimentaire
+         * ProduitLivre        -> version livre
+         */
+
+
+        // ====================================================================
+        // TEST 5 - DICTIONARY
+        // ====================================================================
+
+        Titre("TEST 5 - Chercher par code");
+
+
+        Produit? trouve =
+            inventaire.ChercherParCode("A001");
+
+
+        if (trouve != null)
+        {
+            Console.WriteLine(
+                "Produit trouvé :"
+            );
+
+            Console.WriteLine(trouve);
+        }
+        else
+        {
+            Console.WriteLine(
+                "Produit absent."
+            );
+        }
+
+
+        // ====================================================================
+        // TEST 6 - CLÉ ABSENTE
+        // ====================================================================
+
+        Titre("TEST 6 - Chercher un code absent");
+
+
+        Produit? absent =
+            inventaire.ChercherParCode("Z999");
+
+
+        if (absent == null)
+        {
+            Console.WriteLine(
+                "Le code Z999 n'existe pas."
+            );
+        }
+
+
+        /*
+         * Contre-cas :
+         *
+         * produitsParCode["Z999"]
+         *
+         * directement sans vérifier.
+         *
+         * Cela provoquerait une erreur
+         * si la clé n'existe pas.
+         */
+
+
+        // ====================================================================
+        // TEST 7 - FILTRE
+        // ====================================================================
+
+        Titre("TEST 7 - Stock faible");
+
+
+        Console.WriteLine(
+            "Produits avec quantité <= 3 :"
+        );
+
+
+        inventaire.AfficherStockFaible(3);
+
+
+        // ====================================================================
+        // TEST 8 - MÉTHODE GÉNÉRIQUE
+        // ====================================================================
+
+        Titre("TEST 8 - Méthode générique");
+
+
+        Console.WriteLine(
+            "Afficher les produits :"
+        );
+
+
+        AfficherTous(
+            inventaire.Produits
+        );
+
+
+        Console.WriteLine();
+
+
+        Console.WriteLine(
+            "Afficher les codes :"
+        );
+
+
+        AfficherTous(
+            inventaire.Codes
+        );
+
+
+        /*
+         * Même méthode :
+         *
+         * AfficherTous<T>
+         *
+         * mais T peut être :
+         *
+         * Produit
+         *
+         * ou
+         *
+         * string
+         */
+
+
+        // ====================================================================
+        // TEST 9 - STACK
+        // ====================================================================
+
+        Titre("TEST 9 - Stack : annuler");
+
+
+        Produit? produitAnnule =
+            inventaire.AnnulerDernierAjout();
+
+
+        if (produitAnnule != null)
+        {
+            Console.WriteLine(
+                $"Dernier ajout annulé : {produitAnnule.Code} - {produitAnnule.Nom}"
+            );
+        }
+
+
+        Console.WriteLine();
+
+
+        Console.WriteLine(
+            "Inventaire après annulation :"
+        );
+
+
+        AfficherTous(
+            inventaire.Produits
+        );
+
+
+        /*
+         * Le dernier produit ajouté était :
+         *
+         * E002 - Clavier
+         *
+         * Stack fonctionne en LIFO :
+         *
+         * Last In
+         * First Out
+         */
+
+
+        // ====================================================================
+        // TEST 10 - VÉRIFIER LE DICTIONARY APRÈS L'ANNULATION
+        // ====================================================================
+
+        Titre("TEST 10 - Collections cohérentes");
+
+
+        Produit? rechercheClavier =
+            inventaire.ChercherParCode("E002");
+
+
+        if (rechercheClavier == null)
+        {
+            Console.WriteLine(
+                "E002 a aussi été retiré du Dictionary."
+            );
+        }
+
+
+        // ====================================================================
+        // TEST 11 - QUEUE
+        // ====================================================================
+
+        Titre("TEST 11 - Queue : réapprovisionnement");
+
+
+        inventaire.AjouterAFileReapprovisionnement(
+            "A001"
+        );
+
+        inventaire.AjouterAFileReapprovisionnement(
+            "L001"
+        );
+
+        inventaire.AjouterAFileReapprovisionnement(
+            "E001"
+        );
+
+
+        Produit? premier =
+            inventaire.TraiterProchainReapprovisionnement();
+
+
+        if (premier != null)
+        {
+            Console.WriteLine(
+                $"Premier produit traité : {premier.Code} - {premier.Nom}"
+            );
+        }
+
+
+        Produit? deuxieme =
+            inventaire.TraiterProchainReapprovisionnement();
+
+
+        if (deuxieme != null)
+        {
+            Console.WriteLine(
+                $"Deuxième produit traité : {deuxieme.Code} - {deuxieme.Nom}"
+            );
+        }
+
+
+        /*
+         * Ordre d'entrée :
+         *
+         * A001
+         * L001
+         * E001
+         *
+         * Ordre de sortie :
+         *
+         * A001
+         * L001
+         * E001
+         *
+         * Queue fonctionne en FIFO :
+         *
+         * First In
+         * First Out
+         */
+
+
+        // ====================================================================
+        // TEST 12 - AJOUT D'UN AUTRE TYPE
+        // ====================================================================
+
+        Titre("TEST 12 - Collections + polymorphisme");
+
+
+        ProduitLivre nouveauLivre =
             new ProduitLivre(
+                "L002",
                 "C# pour débutants",
                 39.99,
                 6,
                 "Marie Tremblay"
-            )
-        };
+            );
 
 
-        foreach (Produit item in inventaire2)
-        {
-            Console.WriteLine();
-
-            item.Afficher();
-        }
+        inventaire.Ajouter(
+            nouveauLivre
+        );
 
 
-        // ========================================================
+        Console.WriteLine(
+            "Un nouveau ProduitLivre a été ajouté."
+        );
+
+        Console.WriteLine(
+            "Aucune nouvelle List n'a été nécessaire."
+        );
+
+
+        inventaire.AfficherTous();
+
+
+        // ====================================================================
         // FIN
-        // ========================================================
+        // ====================================================================
 
         Titre("FIN DU LABO");
     }
 
 
-    // ============================================================
-    // MÉTHODE UTILITAIRE
-    // ============================================================
+    // ========================================================================
+    // MÉTHODE GÉNÉRIQUE
+    // ========================================================================
     //
-    // Elle sert seulement à rendre l'affichage console plus clair.
+    // T représente le type des éléments.
+    //
+    // IEnumerable<T> signifie simplement :
+    //
+    // "Je veux quelque chose que je peux parcourir."
+    //
+    // La méthode n'a pas besoin de savoir
+    // s'il s'agit d'une List, d'un HashSet, etc.
 
-    private static void Titre(string texte)
+    public static void AfficherTous<T>(
+        IEnumerable<T> elements
+    )
+    {
+        foreach (T element in elements)
+        {
+            Console.WriteLine(element);
+        }
+    }
+
+
+    // ========================================================================
+    // MÉTHODE POUR TESTER L'AJOUT
+    // ========================================================================
+
+    public static void AjouterEtAfficherResultat(
+        GestionInventaire inventaire,
+        Produit produit
+    )
+    {
+        bool ajoute =
+            inventaire.Ajouter(produit);
+
+
+        if (ajoute)
+        {
+            Console.WriteLine(
+                $"Ajouté : {produit.Code} - {produit.Nom}"
+            );
+        }
+        else
+        {
+            Console.WriteLine(
+                $"Refusé : le code {produit.Code} existe déjà."
+            );
+        }
+    }
+
+
+    // ========================================================================
+    // MÉTHODE POUR RENDRE LA CONSOLE PLUS LISIBLE
+    // ========================================================================
+
+    public static void Titre(string texte)
     {
         Console.WriteLine();
+
         Console.WriteLine(
-            "================================================="
+            "============================================================"
         );
 
         Console.WriteLine(texte);
 
         Console.WriteLine(
-            "================================================="
+            "============================================================"
         );
     }
 }
