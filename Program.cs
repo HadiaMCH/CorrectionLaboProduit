@@ -1,35 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
-
+ 
+ 
 // ============================================================================
 // CLASSE MÈRE : Produit
 // ============================================================================
 //
 // Cette classe contient les informations communes à tous les produits.
 //
-// Les notions du bloc 3 restent présentes :
+// Notions utilisées :
+// - encapsulation
+// - readonly
+// - propriétés
+// - constructeur
+// - static
 // - héritage
 // - virtual / override
 // - polymorphisme
-//
-// Le bloc 4 ajoutera les collections autour de ces objets.
 // ============================================================================
-
+ 
 public class Produit
 {
-    private string code = string.Empty;
+    // ========================================================================
+    // CHAMPS PRIVÉS
+    // ========================================================================
+ 
+    // CODE est l'identifiant du produit.
+    //
+    // readonly signifie :
+    // - on peut lui donner une valeur lors de sa déclaration
+    //   ou dans le constructeur;
+    // - une fois l'objet construit, cette valeur ne peut plus changer.
+    //
+    // C'est logique pour un identifiant.
+    private readonly string code;
+ 
     private string nom = string.Empty;
     private double prix;
     private int quantite;
-
-    // Compteur partagé par Produit et toutes ses sous-classes.
+ 
+ 
+    // ========================================================================
+    // MEMBRE STATIC
+    // ========================================================================
+ 
+    // Un seul compteur partagé par Produit
+    // et toutes ses sous-classes.
     public static int NbProduits { get; private set; }
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // CONSTRUCTEUR
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     public Produit(
         string code,
         string nom,
@@ -37,54 +60,74 @@ public class Produit
         int quantite
     )
     {
-        Code = code;
+        // --------------------------------------------------------------------
+        // Validation du CODE
+        // --------------------------------------------------------------------
+        //
+        // Comme code est readonly, on valide puis on affecte
+        // directement le champ dans le constructeur.
+ 
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new ArgumentException(
+                "Le code du produit ne peut pas être vide."
+            );
+        }
+ 
+        this.code = code;
+ 
+ 
+        // --------------------------------------------------------------------
+        // Autres propriétés
+        // --------------------------------------------------------------------
+        //
+        // Nom, Prix et Quantite peuvent changer plus tard.
+        // On utilise donc leurs propriétés pour bénéficier
+        // des validations.
+ 
         Nom = nom;
         Prix = prix;
         Quantite = quantite;
-
+ 
+ 
         NbProduits++;
     }
-
-
-    // ------------------------------------------------------------------------
-    // PROPRIÉTÉ Code
-    // ------------------------------------------------------------------------
-    //
-    // Le code servira de clé dans le Dictionary
-    // et de valeur unique dans le HashSet.
-
+ 
+ 
+    // ========================================================================
+    // PROPRIÉTÉ CODE - LECTURE SEULE
+    // ========================================================================
+ 
     public string Code
     {
         get
         {
             return code;
         }
-
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new ArgumentException(
-                    "Le code du produit ne peut pas être vide."
-                );
-            }
-
-            code = value;
-        }
     }
-
-
-    // ------------------------------------------------------------------------
-    // PROPRIÉTÉ Nom
-    // ------------------------------------------------------------------------
-
+ 
+    /*
+     * Donc :
+     *
+     * Console.WriteLine(produit.Code);  // OK
+     *
+     * produit.Code = "E999";            // INTERDIT
+     *
+     * Le code est fixé lors de la création.
+     */
+ 
+ 
+    // ========================================================================
+    // PROPRIÉTÉ NOM
+    // ========================================================================
+ 
     public string Nom
     {
         get
         {
             return nom;
         }
-
+ 
         set
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -93,23 +136,23 @@ public class Produit
                     "Le nom du produit ne peut pas être vide."
                 );
             }
-
+ 
             nom = value;
         }
     }
-
-
-    // ------------------------------------------------------------------------
-    // PROPRIÉTÉ Prix
-    // ------------------------------------------------------------------------
-
+ 
+ 
+    // ========================================================================
+    // PROPRIÉTÉ PRIX
+    // ========================================================================
+ 
     public double Prix
     {
         get
         {
             return prix;
         }
-
+ 
         set
         {
             if (value < 0)
@@ -118,23 +161,23 @@ public class Produit
                     "Le prix ne peut pas être négatif."
                 );
             }
-
+ 
             prix = value;
         }
     }
-
-
-    // ------------------------------------------------------------------------
-    // PROPRIÉTÉ Quantite
-    // ------------------------------------------------------------------------
-
+ 
+ 
+    // ========================================================================
+    // PROPRIÉTÉ QUANTITÉ
+    // ========================================================================
+ 
     public int Quantite
     {
         get
         {
             return quantite;
         }
-
+ 
         set
         {
             if (value < 0)
@@ -143,28 +186,26 @@ public class Produit
                     "La quantité ne peut pas être négative."
                 );
             }
-
+ 
             quantite = value;
         }
     }
-
-
-    // ------------------------------------------------------------------------
-    // MÉTHODE COMMUNE
-    // ------------------------------------------------------------------------
-
+ 
+ 
+    // ========================================================================
+    // VALEUR DU STOCK
+    // ========================================================================
+ 
     public double ValeurStock()
     {
         return Prix * Quantite;
     }
-
-
-    // ------------------------------------------------------------------------
-    // MÉTHODE VIRTUAL
-    // ------------------------------------------------------------------------
-    //
-    // Les sous-classes pourront redéfinir cette méthode.
-
+ 
+ 
+    // ========================================================================
+    // AFFICHER - VIRTUAL
+    // ========================================================================
+ 
     public virtual void Afficher()
     {
         Console.WriteLine($"Code            : {Code}");
@@ -175,32 +216,28 @@ public class Produit
             $"Valeur du stock : {ValeurStock():F2} $"
         );
     }
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // TOSTRING
-    // ------------------------------------------------------------------------
-    //
-    // Permet d'obtenir un affichage utile lorsqu'on fait :
-    //
-    // Console.WriteLine(produit);
-
+    // ========================================================================
+ 
     public override string ToString()
     {
         return $"{Code} - {Nom} - {Prix:F2} $ - quantité : {Quantite}";
     }
 }
-
-
+ 
+ 
 // ============================================================================
 // SOUS-CLASSE : ProduitElectronique
 // ============================================================================
-
+ 
 public class ProduitElectronique : Produit
 {
     private int garantieMois;
-
-
+ 
+ 
     public ProduitElectronique(
         string code,
         string nom,
@@ -216,11 +253,11 @@ public class ProduitElectronique : Produit
                 "La garantie ne peut pas être négative."
             );
         }
-
+ 
         this.garantieMois = garantieMois;
     }
-
-
+ 
+ 
     public int GarantieMois
     {
         get
@@ -228,31 +265,31 @@ public class ProduitElectronique : Produit
             return garantieMois;
         }
     }
-
-
+ 
+ 
     public override void Afficher()
     {
-        // Réutilisation de l'affichage commun.
+        // Partie commune.
         base.Afficher();
-
-        // Information spécifique.
+ 
+        // Partie spécifique.
         Console.WriteLine("Type            : Électronique");
         Console.WriteLine(
             $"Garantie        : {GarantieMois} mois"
         );
     }
 }
-
-
+ 
+ 
 // ============================================================================
 // SOUS-CLASSE : ProduitAlimentaire
 // ============================================================================
-
+ 
 public class ProduitAlimentaire : Produit
 {
     private DateTime expiration;
-
-
+ 
+ 
     public ProduitAlimentaire(
         string code,
         string nom,
@@ -264,8 +301,8 @@ public class ProduitAlimentaire : Produit
     {
         this.expiration = expiration;
     }
-
-
+ 
+ 
     public DateTime Expiration
     {
         get
@@ -273,29 +310,30 @@ public class ProduitAlimentaire : Produit
             return expiration;
         }
     }
-
-
+ 
+ 
     public override void Afficher()
     {
         base.Afficher();
-
+ 
         Console.WriteLine("Type            : Alimentaire");
+ 
         Console.WriteLine(
             $"Expiration      : {Expiration:yyyy-MM-dd}"
         );
     }
 }
-
-
+ 
+ 
 // ============================================================================
 // SOUS-CLASSE : ProduitLivre
 // ============================================================================
-
+ 
 public class ProduitLivre : Produit
 {
     private string auteur = string.Empty;
-
-
+ 
+ 
     public ProduitLivre(
         string code,
         string nom,
@@ -311,11 +349,11 @@ public class ProduitLivre : Produit
                 "L'auteur ne peut pas être vide."
             );
         }
-
+ 
         this.auteur = auteur;
     }
-
-
+ 
+ 
     public string Auteur
     {
         get
@@ -323,32 +361,32 @@ public class ProduitLivre : Produit
             return auteur;
         }
     }
-
-
+ 
+ 
     public override void Afficher()
     {
         base.Afficher();
-
+ 
         Console.WriteLine("Type            : Livre");
         Console.WriteLine($"Auteur          : {Auteur}");
     }
 }
-
-
+ 
+ 
 // ============================================================================
-// CLASSE GestionInventaire
+// CLASSE : GestionInventaire
 // ============================================================================
 //
-// Cette classe montre que plusieurs collections peuvent travailler ensemble.
+// Cette classe utilise plusieurs collections.
 //
 // List<Produit>
-//     -> parcourir tous les produits.
+//     -> ajouter et parcourir.
 //
 // Dictionary<string, Produit>
-//     -> retrouver rapidement un produit avec son code.
+//     -> retrouver un Produit grâce à son Code.
 //
 // HashSet<string>
-//     -> empêcher les codes en doublon.
+//     -> empêcher deux produits avec le même Code.
 //
 // Stack<Produit>
 //     -> annuler le dernier ajout.
@@ -356,56 +394,53 @@ public class ProduitLivre : Produit
 // Queue<Produit>
 //     -> gérer une file de réapprovisionnement.
 // ============================================================================
-
+ 
 public class GestionInventaire
 {
-    // ------------------------------------------------------------------------
+    // ========================================================================
     // LIST
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     private List<Produit> produits =
         new List<Produit>();
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // DICTIONARY
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     private Dictionary<string, Produit> produitsParCode =
         new Dictionary<string, Produit>();
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // HASHSET
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     private HashSet<string> codes =
         new HashSet<string>();
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // STACK
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     private Stack<Produit> historiqueAjouts =
         new Stack<Produit>();
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // QUEUE
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     private Queue<Produit> fileReapprovisionnement =
         new Queue<Produit>();
-
-
-    // ------------------------------------------------------------------------
-    // IEnumerable<Produit>
-    // ------------------------------------------------------------------------
-    //
-    // Le programme extérieur peut parcourir les produits,
-    // mais il ne reçoit pas directement la List privée.
-
+ 
+ 
+    // ========================================================================
+    // PRODUITS - PARCOURS SEULEMENT
+    // ========================================================================
+ 
     public IEnumerable<Produit> Produits
     {
         get
@@ -413,8 +448,12 @@ public class GestionInventaire
             return produits;
         }
     }
-
-
+ 
+ 
+    // ========================================================================
+    // CODES - PARCOURS SEULEMENT
+    // ========================================================================
+ 
     public IEnumerable<string> Codes
     {
         get
@@ -422,212 +461,235 @@ public class GestionInventaire
             return codes;
         }
     }
-
-
-    // ------------------------------------------------------------------------
-    // AJOUTER UN PRODUIT
-    // ------------------------------------------------------------------------
-
+ 
+ 
+    // ========================================================================
+    // AJOUTER
+    // ========================================================================
+ 
     public bool Ajouter(Produit produit)
     {
         /*
-         * On commence par le HashSet.
+         * Étape 1 :
+         *
+         * HashSet vérifie si le code existe déjà.
          *
          * Add retourne :
          *
-         * true  -> le code est nouveau
-         * false -> le code existe déjà
+         * true  -> nouveau code
+         * false -> doublon
          */
-
-        bool codeNouveau = codes.Add(produit.Code);
-
+ 
+        bool codeNouveau =
+            codes.Add(produit.Code);
+ 
+ 
         if (!codeNouveau)
         {
             return false;
         }
-
-
-        // Le produit est ajouté à la List
-        // pour pouvoir être parcouru.
+ 
+ 
+        // Étape 2 :
+        // garder le Produit dans la List.
         produits.Add(produit);
-
-
-        // Le produit est ajouté au Dictionary
-        // pour permettre la recherche par code.
-        produitsParCode[produit.Code] = produit;
-
-
-        // On mémorise le dernier ajout
-        // pour pouvoir l'annuler.
+ 
+ 
+        // Étape 3 :
+        // créer l'association :
+        //
+        // code -> produit
+ 
+        produitsParCode[produit.Code] =
+            produit;
+ 
+ 
+        // Étape 4 :
+        // mémoriser le dernier ajout.
         historiqueAjouts.Push(produit);
-
-
+ 
+ 
         return true;
     }
-
-
-    // ------------------------------------------------------------------------
-    // RECHERCHER AVEC DICTIONARY
-    // ------------------------------------------------------------------------
-
-    public Produit? ChercherParCode(string code)
+ 
+ 
+    // ========================================================================
+    // CHERCHER PAR CODE
+    // ========================================================================
+ 
+    public Produit? ChercherParCode(
+        string code
+    )
     {
-        /*
-         * On vérifie la présence de la clé
-         * avant d'utiliser produitsParCode[code].
-         */
-
         if (produitsParCode.ContainsKey(code))
         {
             return produitsParCode[code];
         }
-
+ 
         return null;
     }
-
-
-    // ------------------------------------------------------------------------
+ 
+ 
+    // ========================================================================
     // AFFICHER TOUS
-    // ------------------------------------------------------------------------
-
+    // ========================================================================
+ 
     public void AfficherTous()
     {
         foreach (Produit produit in produits)
         {
             Console.WriteLine();
-            Console.WriteLine("----------------------------------------");
-
-            /*
-             * Le tableau n'est pas nécessaire.
-             *
-             * La List<Produit> peut contenir :
-             *
-             * ProduitElectronique
-             * ProduitAlimentaire
-             * ProduitLivre
-             *
-             * Grâce au polymorphisme.
-             */
-
+ 
+            Console.WriteLine(
+                "----------------------------------------"
+            );
+ 
+ 
+            // Polymorphisme :
+            //
+            // ProduitElectronique
+            // ProduitAlimentaire
+            // ProduitLivre
+            //
+            // ont chacun leur version de Afficher().
+ 
             produit.Afficher();
         }
     }
-
-
-    // ------------------------------------------------------------------------
-    // FILTRER LES PRODUITS
-    // ------------------------------------------------------------------------
-
-    public void AfficherStockFaible(int seuil)
+ 
+ 
+    // ========================================================================
+    // FILTRER SELON LE STOCK
+    // ========================================================================
+ 
+    public void AfficherStockFaible(
+        int seuil
+    )
     {
         foreach (Produit produit in produits)
         {
-            // foreach visite tous les produits.
-            //
-            // if décide lesquels afficher.
-
             if (produit.Quantite <= seuil)
             {
                 Console.WriteLine(produit);
             }
         }
     }
-
-
-    // ------------------------------------------------------------------------
-    // STACK : ANNULER LE DERNIER AJOUT
-    // ------------------------------------------------------------------------
-
+ 
+ 
+    // ========================================================================
+    // STACK - ANNULER LE DERNIER AJOUT
+    // ========================================================================
+ 
     public Produit? AnnulerDernierAjout()
     {
         if (historiqueAjouts.Count == 0)
         {
             return null;
         }
-
-
-        // Pop retire le dernier produit ajouté.
-        Produit produit = historiqueAjouts.Pop();
-
-
-        // Important :
-        // il faut supprimer ce produit de toutes
-        // les collections principales.
-
+ 
+ 
+        // LIFO :
+        //
+        // Last In
+        // First Out
+ 
+        Produit produit =
+            historiqueAjouts.Pop();
+ 
+ 
+        // Il faut maintenir toutes les collections cohérentes.
+ 
         produits.Remove(produit);
-
-        produitsParCode.Remove(produit.Code);
-
-        codes.Remove(produit.Code);
-
-
+ 
+        produitsParCode.Remove(
+            produit.Code
+        );
+ 
+        codes.Remove(
+            produit.Code
+        );
+ 
+ 
         return produit;
     }
-
-
-    // ------------------------------------------------------------------------
-    // QUEUE : AJOUTER À LA FILE DE RÉAPPROVISIONNEMENT
-    // ------------------------------------------------------------------------
-
-    public bool AjouterAFileReapprovisionnement(string code)
+ 
+ 
+    // ========================================================================
+    // QUEUE - AJOUTER À LA FILE
+    // ========================================================================
+ 
+    public bool AjouterAFileReapprovisionnement(
+        string code
+    )
     {
-        Produit? produit = ChercherParCode(code);
-
-
+        Produit? produit =
+            ChercherParCode(code);
+ 
+ 
         if (produit == null)
         {
             return false;
         }
-
-
-        // Enqueue ajoute à la fin de la file.
-        fileReapprovisionnement.Enqueue(produit);
-
-
+ 
+ 
+        // Ajouter à la fin.
+        fileReapprovisionnement.Enqueue(
+            produit
+        );
+ 
+ 
         return true;
     }
-
-
-    // ------------------------------------------------------------------------
-    // QUEUE : TRAITER LE PREMIER PRODUIT
-    // ------------------------------------------------------------------------
-
+ 
+ 
+    // ========================================================================
+    // QUEUE - TRAITER LE PREMIER
+    // ========================================================================
+ 
     public Produit? TraiterProchainReapprovisionnement()
     {
         if (fileReapprovisionnement.Count == 0)
         {
             return null;
         }
-
-
-        // Dequeue retire le premier élément.
+ 
+ 
+        // FIFO :
+        //
+        // First In
+        // First Out
+ 
         return fileReapprovisionnement.Dequeue();
     }
 }
-
-
+ 
+ 
 // ============================================================================
 // PROGRAMME PRINCIPAL
 // ============================================================================
-
+ 
 public class Program
 {
     public static void Main(string[] args)
     {
-        Titre("LABO - COLLECTIONS ET GÉNÉRIQUES");
-
-
+        Titre(
+            "LABO - COLLECTIONS ET GÉNÉRIQUES"
+        );
+ 
+ 
         GestionInventaire inventaire =
             new GestionInventaire();
-
-
+ 
+ 
         // ====================================================================
         // TEST 1 - CRÉATION DES PRODUITS
         // ====================================================================
-
-        Titre("TEST 1 - Création des produits");
-
-
+ 
+        Titre(
+            "TEST 1 - Création des produits"
+        );
+ 
+ 
         ProduitElectronique ecouteurs =
             new ProduitElectronique(
                 "E001",
@@ -636,18 +698,22 @@ public class Program
                 8,
                 24
             );
-
-
+ 
+ 
         ProduitAlimentaire yogourt =
             new ProduitAlimentaire(
                 "A001",
                 "Yogourt",
                 3.99,
                 3,
-                new DateTime(2026, 9, 15)
+                new DateTime(
+                    2026,
+                    9,
+                    15
+                )
             );
-
-
+ 
+ 
         ProduitLivre livre =
             new ProduitLivre(
                 "L001",
@@ -656,8 +722,8 @@ public class Program
                 2,
                 "Robert C. Martin"
             );
-
-
+ 
+ 
         ProduitElectronique clavier =
             new ProduitElectronique(
                 "E002",
@@ -666,122 +732,139 @@ public class Program
                 12,
                 36
             );
-
-
+ 
+ 
         Console.WriteLine(
             $"Nombre d'objets Produit créés : {Produit.NbProduits}"
         );
-
-
+ 
+ 
         // ====================================================================
-        // TEST 2 - AJOUT DANS LES COLLECTIONS
+        // TEST 2 - READONLY
         // ====================================================================
-
-        Titre("TEST 2 - Ajouter les produits");
-
-
+ 
+        Titre(
+            "TEST 2 - Code readonly"
+        );
+ 
+ 
+        Console.WriteLine(
+            $"Code des écouteurs : {ecouteurs.Code}"
+        );
+ 
+ 
+        /*
+         * Cette ligne serait INTERDITE :
+         *
+         * ecouteurs.Code = "E999";
+         *
+         * Pourquoi ?
+         *
+         * Code ne possède pas de set
+         * et le champ code est readonly.
+         *
+         * L'identifiant reste donc stable.
+         */
+ 
+ 
+        // ====================================================================
+        // TEST 3 - AJOUTER LES PRODUITS
+        // ====================================================================
+ 
+        Titre(
+            "TEST 3 - Ajouter les produits"
+        );
+ 
+ 
         AjouterEtAfficherResultat(
             inventaire,
             ecouteurs
         );
-
-
+ 
+ 
         AjouterEtAfficherResultat(
             inventaire,
             yogourt
         );
-
-
+ 
+ 
         AjouterEtAfficherResultat(
             inventaire,
             livre
         );
-
-
+ 
+ 
         AjouterEtAfficherResultat(
             inventaire,
             clavier
         );
-
-
+ 
+ 
         // ====================================================================
-        // TEST 3 - HASHSET ET DOUBLON
+        // TEST 4 - HASHSET : DOUBLON
         // ====================================================================
-
-        Titre("TEST 3 - Refuser un doublon");
-
-
+ 
+        Titre(
+            "TEST 4 - Refuser un doublon"
+        );
+ 
+ 
         bool ajouteEncore =
-            inventaire.Ajouter(ecouteurs);
-
-
+            inventaire.Ajouter(
+                ecouteurs
+            );
+ 
+ 
         if (ajouteEncore)
         {
             Console.WriteLine(
-                "Le produit a été ajouté."
+                "Produit ajouté."
             );
         }
         else
         {
             Console.WriteLine(
-                "Ajout refusé : le code E001 existe déjà."
+                "Ajout refusé : E001 existe déjà."
             );
         }
-
-
-        /*
-         * Le HashSet protège ici l'unicité.
-         *
-         * E001 existe déjà.
-         *
-         * codes.Add("E001")
-         *
-         * retourne donc false.
-         */
-
-
+ 
+ 
         // ====================================================================
-        // TEST 4 - LIST + FOREACH + POLYMORPHISME
+        // TEST 5 - LIST + FOREACH + POLYMORPHISME
         // ====================================================================
-
-        Titre("TEST 4 - Parcourir la List");
-
-
+ 
+        Titre(
+            "TEST 5 - Parcourir la List"
+        );
+ 
+ 
         inventaire.AfficherTous();
-
-
-        /*
-         * List<Produit> contient des objets
-         * de types différents.
-         *
-         * Pourtant, le foreach utilise toujours :
-         *
-         * produit.Afficher();
-         *
-         * ProduitElectronique -> version électronique
-         * ProduitAlimentaire  -> version alimentaire
-         * ProduitLivre        -> version livre
-         */
-
-
+ 
+ 
         // ====================================================================
-        // TEST 5 - DICTIONARY
+        // TEST 6 - DICTIONARY
         // ====================================================================
-
-        Titre("TEST 5 - Chercher par code");
-
-
+ 
+        Titre(
+            "TEST 6 - Recherche avec Dictionary"
+        );
+ 
+ 
         Produit? trouve =
-            inventaire.ChercherParCode("A001");
-
-
+            inventaire.ChercherParCode(
+                "A001"
+            );
+ 
+ 
         if (trouve != null)
         {
             Console.WriteLine(
                 "Produit trouvé :"
             );
-
-            Console.WriteLine(trouve);
+ 
+            Console.WriteLine(
+                trouve
+            );
         }
         else
         {
@@ -789,233 +872,193 @@ public class Program
                 "Produit absent."
             );
         }
-
-
+ 
+ 
         // ====================================================================
-        // TEST 6 - CLÉ ABSENTE
+        // TEST 7 - CODE ABSENT
         // ====================================================================
-
-        Titre("TEST 6 - Chercher un code absent");
-
-
+ 
+        Titre(
+            "TEST 7 - Code absent"
+        );
+ 
+ 
         Produit? absent =
-            inventaire.ChercherParCode("Z999");
-
-
+            inventaire.ChercherParCode(
+                "Z999"
+            );
+ 
+ 
         if (absent == null)
         {
             Console.WriteLine(
-                "Le code Z999 n'existe pas."
+                "Z999 n'existe pas."
             );
         }
-
-
-        /*
-         * Contre-cas :
-         *
-         * produitsParCode["Z999"]
-         *
-         * directement sans vérifier.
-         *
-         * Cela provoquerait une erreur
-         * si la clé n'existe pas.
-         */
-
-
+ 
+ 
         // ====================================================================
-        // TEST 7 - FILTRE
+        // TEST 8 - FILTRE
         // ====================================================================
-
-        Titre("TEST 7 - Stock faible");
-
-
+ 
+        Titre(
+            "TEST 8 - Stock faible"
+        );
+ 
+ 
         Console.WriteLine(
             "Produits avec quantité <= 3 :"
         );
-
-
-        inventaire.AfficherStockFaible(3);
-
-
-        // ====================================================================
-        // TEST 8 - MÉTHODE GÉNÉRIQUE
-        // ====================================================================
-
-        Titre("TEST 8 - Méthode générique");
-
-
-        Console.WriteLine(
-            "Afficher les produits :"
+ 
+ 
+        inventaire.AfficherStockFaible(
+            3
         );
-
-
+ 
+ 
+        // ====================================================================
+        // TEST 9 - MÉTHODE GÉNÉRIQUE
+        // ====================================================================
+ 
+        Titre(
+            "TEST 9 - Méthode générique"
+        );
+ 
+ 
+        Console.WriteLine(
+            "Produits :"
+        );
+ 
+ 
         AfficherTous(
             inventaire.Produits
         );
-
-
+ 
+ 
         Console.WriteLine();
-
-
+ 
+ 
         Console.WriteLine(
-            "Afficher les codes :"
+            "Codes uniques :"
         );
-
-
+ 
+ 
         AfficherTous(
             inventaire.Codes
         );
-
-
-        /*
-         * Même méthode :
-         *
-         * AfficherTous<T>
-         *
-         * mais T peut être :
-         *
-         * Produit
-         *
-         * ou
-         *
-         * string
-         */
-
-
+ 
+ 
         // ====================================================================
-        // TEST 9 - STACK
+        // TEST 10 - STACK
         // ====================================================================
-
-        Titre("TEST 9 - Stack : annuler");
-
-
+ 
+        Titre(
+            "TEST 10 - Stack : annuler le dernier ajout"
+        );
+ 
+ 
         Produit? produitAnnule =
             inventaire.AnnulerDernierAjout();
-
-
+ 
+ 
         if (produitAnnule != null)
         {
             Console.WriteLine(
-                $"Dernier ajout annulé : {produitAnnule.Code} - {produitAnnule.Nom}"
+                $"Produit annulé : {produitAnnule.Code} - {produitAnnule.Nom}"
             );
         }
-
-
+ 
+ 
         Console.WriteLine();
-
-
+ 
         Console.WriteLine(
             "Inventaire après annulation :"
         );
-
-
+ 
+ 
         AfficherTous(
             inventaire.Produits
         );
-
-
-        /*
-         * Le dernier produit ajouté était :
-         *
-         * E002 - Clavier
-         *
-         * Stack fonctionne en LIFO :
-         *
-         * Last In
-         * First Out
-         */
-
-
+ 
+ 
         // ====================================================================
-        // TEST 10 - VÉRIFIER LE DICTIONARY APRÈS L'ANNULATION
+        // TEST 11 - VÉRIFIER LE DICTIONARY
         // ====================================================================
-
-        Titre("TEST 10 - Collections cohérentes");
-
-
-        Produit? rechercheClavier =
-            inventaire.ChercherParCode("E002");
-
-
-        if (rechercheClavier == null)
+ 
+        Titre(
+            "TEST 11 - Collections cohérentes"
+        );
+ 
+ 
+        Produit? clavierApresAnnulation =
+            inventaire.ChercherParCode(
+                "E002"
+            );
+ 
+ 
+        if (clavierApresAnnulation == null)
         {
             Console.WriteLine(
                 "E002 a aussi été retiré du Dictionary."
             );
         }
-
-
+ 
+ 
         // ====================================================================
-        // TEST 11 - QUEUE
+        // TEST 12 - QUEUE
         // ====================================================================
-
-        Titre("TEST 11 - Queue : réapprovisionnement");
-
-
+ 
+        Titre(
+            "TEST 12 - Queue : réapprovisionnement"
+        );
+ 
+ 
         inventaire.AjouterAFileReapprovisionnement(
             "A001"
         );
-
+ 
         inventaire.AjouterAFileReapprovisionnement(
             "L001"
         );
-
+ 
         inventaire.AjouterAFileReapprovisionnement(
             "E001"
         );
-
-
+ 
+ 
         Produit? premier =
             inventaire.TraiterProchainReapprovisionnement();
-
-
+ 
+ 
         if (premier != null)
         {
             Console.WriteLine(
-                $"Premier produit traité : {premier.Code} - {premier.Nom}"
+                $"Premier traité : {premier.Code} - {premier.Nom}"
             );
         }
-
-
+ 
+ 
         Produit? deuxieme =
             inventaire.TraiterProchainReapprovisionnement();
-
-
+ 
+ 
         if (deuxieme != null)
         {
             Console.WriteLine(
-                $"Deuxième produit traité : {deuxieme.Code} - {deuxieme.Nom}"
+                $"Deuxième traité : {deuxieme.Code} - {deuxieme.Nom}"
             );
         }
-
-
-        /*
-         * Ordre d'entrée :
-         *
-         * A001
-         * L001
-         * E001
-         *
-         * Ordre de sortie :
-         *
-         * A001
-         * L001
-         * E001
-         *
-         * Queue fonctionne en FIFO :
-         *
-         * First In
-         * First Out
-         */
-
-
+ 
+ 
         // ====================================================================
-        // TEST 12 - AJOUT D'UN AUTRE TYPE
+        // TEST 13 - AJOUTER UN NOUVEAU TYPE
         // ====================================================================
-
-        Titre("TEST 12 - Collections + polymorphisme");
-
-
+ 
+        Titre(
+            "TEST 13 - Collections + polymorphisme"
+        );
+ 
+ 
         ProduitLivre nouveauLivre =
             new ProduitLivre(
                 "L002",
@@ -1024,70 +1067,66 @@ public class Program
                 6,
                 "Marie Tremblay"
             );
-
-
+ 
+ 
         inventaire.Ajouter(
             nouveauLivre
         );
-
-
+ 
+ 
         Console.WriteLine(
-            "Un nouveau ProduitLivre a été ajouté."
+            "ProduitLivre ajouté sans créer une nouvelle List."
         );
-
-        Console.WriteLine(
-            "Aucune nouvelle List n'a été nécessaire."
-        );
-
-
+ 
+ 
+        Console.WriteLine();
+ 
+ 
         inventaire.AfficherTous();
-
-
+ 
+ 
         // ====================================================================
         // FIN
         // ====================================================================
-
-        Titre("FIN DU LABO");
+ 
+        Titre(
+            "FIN DU LABO"
+        );
     }
-
-
+ 
+ 
     // ========================================================================
     // MÉTHODE GÉNÉRIQUE
     // ========================================================================
-    //
-    // T représente le type des éléments.
-    //
-    // IEnumerable<T> signifie simplement :
-    //
-    // "Je veux quelque chose que je peux parcourir."
-    //
-    // La méthode n'a pas besoin de savoir
-    // s'il s'agit d'une List, d'un HashSet, etc.
-
+ 
     public static void AfficherTous<T>(
         IEnumerable<T> elements
     )
     {
         foreach (T element in elements)
         {
-            Console.WriteLine(element);
+            Console.WriteLine(
+                element
+            );
         }
     }
-
-
+ 
+ 
     // ========================================================================
-    // MÉTHODE POUR TESTER L'AJOUT
+    // MÉTHODE D'AJOUT
     // ========================================================================
-
+ 
     public static void AjouterEtAfficherResultat(
         GestionInventaire inventaire,
         Produit produit
     )
     {
         bool ajoute =
-            inventaire.Ajouter(produit);
-
-
+            inventaire.Ajouter(
+                produit
+            );
+ 
+ 
         if (ajoute)
         {
             Console.WriteLine(
@@ -1101,22 +1140,26 @@ public class Program
             );
         }
     }
-
-
+ 
+ 
     // ========================================================================
-    // MÉTHODE POUR RENDRE LA CONSOLE PLUS LISIBLE
+    // MÉTHODE D'AFFICHAGE DES TITRES
     // ========================================================================
-
-    public static void Titre(string texte)
+ 
+    public static void Titre(
+        string texte
+    )
     {
         Console.WriteLine();
-
+ 
         Console.WriteLine(
             "============================================================"
         );
-
-        Console.WriteLine(texte);
-
+ 
+        Console.WriteLine(
+            texte
+        );
+ 
         Console.WriteLine(
             "============================================================"
         );
