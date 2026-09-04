@@ -1,73 +1,55 @@
 ﻿using System;
 
 // ================================================================
-// CLASSE PRODUIT
+// CLASSE MÈRE : Produit
 // ================================================================
 //
-// Cette classe représente un produit dans un magasin.
+// Produit contient tout ce qui est COMMUN
+// à tous les produits du magasin.
 //
-// Chaque produit possède :
-// - un nom
-// - un prix
-// - une quantité
-//
-// La classe protège ses données grâce à l'encapsulation.
+// Les sous-classes vont hériter de cette classe.
 // ================================================================
 
 public class Produit
 {
-    // ============================================================
-    // 1. CHAMPS PRIVÉS
-    // ============================================================
-
-    // Les champs sont privés afin d'empêcher leur modification
-    // directe depuis l'extérieur de la classe.
+    // ------------------------------------------------------------
+    // CHAMPS PRIVÉS
+    // ------------------------------------------------------------
 
     private string nom = string.Empty;
     private double prix;
     private int quantite;
 
 
-    // ============================================================
-    // 2. MEMBRE STATIC
-    // ============================================================
-
-    // Cette propriété appartient à la CLASSE Produit.
-    // Il existe donc un seul compteur partagé par tous les objets.
+    // ------------------------------------------------------------
+    // MEMBRE STATIC
+    // ------------------------------------------------------------
     //
-    // Le private set empêche le reste du programme
-    // de modifier directement le compteur.
+    // Ce compteur est partagé par Produit
+    // ET toutes ses sous-classes.
+
     public static int NbProduits { get; private set; }
 
 
-    // ============================================================
-    // 3. CONSTRUCTEUR
-    // ============================================================
-
-    // Le constructeur est appelé lorsqu'on écrit :
-    //
-    // new Produit(...)
-    //
-    // Son rôle est de créer un produit avec des valeurs valides.
+    // ------------------------------------------------------------
+    // CONSTRUCTEUR DE Produit
+    // ------------------------------------------------------------
 
     public Produit(string nom, double prix, int quantite)
     {
-        // Nous utilisons les propriétés pour initialiser les champs.
-        // Les validations présentes dans les propriétés seront
-        // donc automatiquement exécutées.
-
+        // On passe par les propriétés
+        // afin d'utiliser leurs validations.
         Nom = nom;
         Prix = prix;
         Quantite = quantite;
 
-        // Un nouvel objet Produit vient réellement d'être créé.
         NbProduits++;
     }
 
 
-    // ============================================================
-    // 4. PROPRIÉTÉ NOM
-    // ============================================================
+    // ------------------------------------------------------------
+    // PROPRIÉTÉ Nom
+    // ------------------------------------------------------------
 
     public string Nom
     {
@@ -78,7 +60,6 @@ public class Produit
 
         set
         {
-            // Le nom ne peut pas être vide.
             if (string.IsNullOrWhiteSpace(value))
             {
                 throw new ArgumentException(
@@ -91,9 +72,9 @@ public class Produit
     }
 
 
-    // ============================================================
-    // 5. PROPRIÉTÉ PRIX
-    // ============================================================
+    // ------------------------------------------------------------
+    // PROPRIÉTÉ Prix
+    // ------------------------------------------------------------
 
     public double Prix
     {
@@ -104,7 +85,6 @@ public class Produit
 
         set
         {
-            // Un prix négatif n'est pas accepté.
             if (value < 0)
             {
                 throw new ArgumentException(
@@ -117,9 +97,9 @@ public class Produit
     }
 
 
-    // ============================================================
-    // 6. PROPRIÉTÉ QUANTITÉ
-    // ============================================================
+    // ------------------------------------------------------------
+    // PROPRIÉTÉ Quantite
+    // ------------------------------------------------------------
 
     public int Quantite
     {
@@ -130,7 +110,6 @@ public class Produit
 
         set
         {
-            // Une quantité négative n'est pas acceptée.
             if (value < 0)
             {
                 throw new ArgumentException(
@@ -143,286 +122,690 @@ public class Produit
     }
 
 
-    // ============================================================
-    // 7. MÉTHODE VALEURSTOCK
-    // ============================================================
-
-    // Cette méthode calcule la valeur totale du stock :
-    //
-    // prix × quantité
+    // ------------------------------------------------------------
+    // MÉTHODE COMMUNE
+    // ------------------------------------------------------------
 
     public double ValeurStock()
     {
         return Prix * Quantite;
     }
+
+
+    // ------------------------------------------------------------
+    // MÉTHODE VIRTUAL
+    // ------------------------------------------------------------
+    //
+    // virtual signifie :
+    //
+    // "Produit possède une version de Afficher(),
+    // mais une sous-classe pourra la redéfinir."
+
+    public virtual void Afficher()
+    {
+        Console.WriteLine($"Nom             : {Nom}");
+        Console.WriteLine($"Prix            : {Prix:F2} $");
+        Console.WriteLine($"Quantité        : {Quantite}");
+        Console.WriteLine(
+            $"Valeur du stock : {ValeurStock():F2} $"
+        );
+    }
 }
 
 
-// =================================================================
+// ================================================================
+// SOUS-CLASSE : ProduitElectronique
+// ================================================================
+//
+// Relation :
+//
+// ProduitElectronique EST UN Produit.
+//
+// ProduitElectronique hérite donc de Produit.
+// ================================================================
+
+public class ProduitElectronique : Produit
+{
+    // Information spécifique aux produits électroniques.
+    private int garantieMois;
+
+
+    // ------------------------------------------------------------
+    // CONSTRUCTEUR
+    // ------------------------------------------------------------
+
+    public ProduitElectronique(
+        string nom,
+        double prix,
+        int quantite,
+        int garantieMois
+    )
+        : base(nom, prix, quantite)
+    {
+        // base(...) appelle le constructeur de Produit.
+
+        // Ensuite, ProduitElectronique initialise
+        // sa propre information.
+        this.garantieMois = garantieMois;
+    }
+
+
+    public int GarantieMois
+    {
+        get
+        {
+            return garantieMois;
+        }
+    }
+
+
+    // ------------------------------------------------------------
+    // OVERRIDE
+    // ------------------------------------------------------------
+    //
+    // override remplace la version générale
+    // de Afficher() pour ProduitElectronique.
+
+    public override void Afficher()
+    {
+        // Appeler d'abord la version commune.
+        base.Afficher();
+
+        // Puis ajouter ce qui est spécifique.
+        Console.WriteLine("Type            : Électronique");
+        Console.WriteLine(
+            $"Garantie        : {garantieMois} mois"
+        );
+    }
+
+
+    // Méthode uniquement disponible
+    // pour ProduitElectronique.
+    public void AfficherGarantie()
+    {
+        Console.WriteLine(
+            $"Garantie de {Nom} : {garantieMois} mois."
+        );
+    }
+}
+
+
+// ================================================================
+// SOUS-CLASSE : ProduitAlimentaire
+// ================================================================
+//
+// ProduitAlimentaire EST UN Produit.
+//
+// Il ajoute une date d'expiration.
+// ================================================================
+
+public class ProduitAlimentaire : Produit
+{
+    private DateTime expiration;
+
+
+    public ProduitAlimentaire(
+        string nom,
+        double prix,
+        int quantite,
+        DateTime expiration
+    )
+        : base(nom, prix, quantite)
+    {
+        this.expiration = expiration;
+    }
+
+
+    public DateTime Expiration
+    {
+        get
+        {
+            return expiration;
+        }
+    }
+
+
+    public override void Afficher()
+    {
+        // Réutiliser l'affichage commun.
+        base.Afficher();
+
+        // Ajouter l'information spécifique.
+        Console.WriteLine("Type            : Alimentaire");
+
+        Console.WriteLine(
+            $"Expiration      : {expiration:yyyy-MM-dd}"
+        );
+    }
+
+
+    public bool EstExpire(DateTime date)
+    {
+        return expiration.Date < date.Date;
+    }
+}
+
+
+// ================================================================
+// SOUS-CLASSE : ProduitLivre
+// ================================================================
+//
+// Cette troisième sous-classe sert à démontrer
+// un avantage important du polymorphisme.
+//
+// On peut ajouter un nouveau type de Produit
+// sans réécrire la boucle foreach.
+// ================================================================
+
+public class ProduitLivre : Produit
+{
+    private string auteur;
+
+
+    public ProduitLivre(
+        string nom,
+        double prix,
+        int quantite,
+        string auteur
+    )
+        : base(nom, prix, quantite)
+    {
+        this.auteur = auteur;
+    }
+
+
+    public string Auteur
+    {
+        get
+        {
+            return auteur;
+        }
+    }
+
+
+    public override void Afficher()
+    {
+        base.Afficher();
+
+        Console.WriteLine("Type            : Livre");
+        Console.WriteLine($"Auteur          : {auteur}");
+    }
+}
+
+
+// ================================================================
 // PROGRAMME PRINCIPAL
-// =================================================================
+// ================================================================
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        Console.WriteLine("=================================");
-        Console.WriteLine("       LABO - CLASSE PRODUIT");
-        Console.WriteLine("=================================");
+        // ========================================================
+        // TEST 1 - CRÉATION D'UN PRODUIT
+        // ========================================================
 
-
-        // =========================================================
-        // TEST 1 : CRÉER UN PREMIER OBJET
-        // =========================================================
-
-        Console.WriteLine();
-        Console.WriteLine("--- Test 1 : création d'un produit ---");
+        Titre("TEST 1 - Produit général");
 
         Produit p1 = new Produit(
-            "Clavier",
-            49.99,
+            "Cahier",
+            4.99,
             10
         );
 
-        Console.WriteLine($"Nom      : {p1.Nom}");
-        Console.WriteLine($"Prix     : {p1.Prix:F2} $");
-        Console.WriteLine($"Quantité : {p1.Quantite}");
+        p1.Afficher();
+
         Console.WriteLine(
-            $"Valeur du stock : {p1.ValeurStock():F2} $"
+            $"Nombre de produits : {Produit.NbProduits}"
         );
 
 
-        // =========================================================
-        // TEST 2 : STATIC
-        // =========================================================
+        // ========================================================
+        // TEST 2 - CRÉATION DES SOUS-CLASSES
+        // ========================================================
+
+        Titre("TEST 2 - Sous-classes");
+
+        ProduitElectronique electronique =
+            new ProduitElectronique(
+                "Écouteurs",
+                79.99,
+                8,
+                24
+            );
+
+        ProduitAlimentaire alimentaire =
+            new ProduitAlimentaire(
+                "Yogourt",
+                3.99,
+                20,
+                new DateTime(2026, 9, 15)
+            );
+
+        ProduitLivre livre =
+            new ProduitLivre(
+                "Clean Code",
+                49.95,
+                4,
+                "Robert C. Martin"
+            );
+
+
+        electronique.Afficher();
 
         Console.WriteLine();
-        Console.WriteLine("--- Test 2 : membre static ---");
 
-        // Jusqu'ici, un seul objet a été créé.
+        alimentaire.Afficher();
+
+        Console.WriteLine();
+
+        livre.Afficher();
+
+
+        // ========================================================
+        // TEST 3 - STATIC ET HÉRITAGE
+        // ========================================================
+
+        Titre("TEST 3 - static");
+
         Console.WriteLine(
-            $"Nombre de produits créés : {Produit.NbProduits}"
+            $"Nombre total de produits créés : {Produit.NbProduits}"
         );
 
-        // Résultat attendu :
-        // 1
+        /*
+         * Résultat attendu :
+         *
+         * 4
+         *
+         * 1 Produit
+         * 1 ProduitElectronique
+         * 1 ProduitAlimentaire
+         * 1 ProduitLivre
+         *
+         * Le compteur appartient à Produit
+         * mais il est partagé avec toutes les sous-classes.
+         */
 
 
-        // =========================================================
-        // TEST 3 : COPIE DE RÉFÉRENCE
-        // =========================================================
+        // ========================================================
+        // TEST 4 - RÉFÉRENCE PARENT / OBJET ENFANT
+        // ========================================================
 
-        Console.WriteLine();
-        Console.WriteLine("--- Test 3 : copie de référence ---");
+        Titre("TEST 4 - Type déclaré et type réel");
+
+
+        // TYPE DÉCLARÉ :
+        // Produit
+        //
+        // TYPE RÉEL :
+        // ProduitElectronique
+
+        Produit produit = electronique;
+
+
+        Console.WriteLine(
+            "Type déclaré : Produit"
+        );
+
+        Console.WriteLine(
+            $"Type réel    : {produit.GetType().Name}"
+        );
+
 
         // IMPORTANT :
         //
-        // Cette ligne NE crée PAS un nouvel objet.
+        // La variable est Produit,
+        // mais l'objet réel est ProduitElectronique.
+
+        produit.Afficher();
+
+
+        /*
+         * Quelle méthode Afficher() est appelée ?
+         *
+         * ProduitElectronique.Afficher()
+         *
+         * Pourquoi ?
+         *
+         * Parce que :
+         *
+         * Produit.Afficher()
+         * est virtual
+         *
+         * et
+         *
+         * ProduitElectronique.Afficher()
+         * est override.
+         *
+         * C# regarde donc le TYPE RÉEL de l'objet.
+         */
+
+
+        // ========================================================
+        // TEST 5 - POLYMORPHISME
+        // ========================================================
+
+        Titre("TEST 5 - Polymorphisme");
+
+
+        // Le tableau est de type Produit[].
         //
-        // Elle copie simplement la référence contenue dans p1.
-        Produit p2 = p1;
+        // Pourtant, les objets à l'intérieur
+        // sont de types différents.
+
+        Produit[] inventaire =
+        {
+            electronique,
+            alimentaire,
+            livre
+        };
 
 
-        // Maintenant :
-        //
-        // p1 ───┐
-        //       ├──> même objet Produit
-        // p2 ───┘
+        foreach (Produit item in inventaire)
+        {
+            Console.WriteLine();
+
+            Console.WriteLine("----------------------------");
+
+            // Toujours le même appel.
+            item.Afficher();
+        }
 
 
-        // Modification avec p2.
-        p2.Quantite = 3;
+        /*
+         * C'est ici qu'on voit le polymorphisme.
+         *
+         * La boucle écrit toujours :
+         *
+         * item.Afficher();
+         *
+         * Pourtant :
+         *
+         * ProduitElectronique
+         * -> appelle Afficher électronique
+         *
+         * ProduitAlimentaire
+         * -> appelle Afficher alimentaire
+         *
+         * ProduitLivre
+         * -> appelle Afficher livre
+         */
+
+
+        // ========================================================
+        // TEST 6 - CONTRE-CAS
+        // ========================================================
+
+        Titre("TEST 6 - Pourquoi éviter les if");
 
 
         Console.WriteLine(
-            $"Quantité avec p1 : {p1.Quantite}"
+            "On pourrait tester chaque type avec des if..."
         );
-
-        Console.WriteLine(
-            $"Quantité avec p2 : {p2.Quantite}"
-        );
-
-
-        // Résultat attendu :
-        //
-        // p1.Quantite = 3
-        // p2.Quantite = 3
-        //
-        // Pourquoi ?
-        //
-        // Parce que p1 et p2 pointent vers le même objet.
-
-
-        // =========================================================
-        // TEST 4 : VALEUR DU STOCK APRÈS MODIFICATION
-        // =========================================================
 
         Console.WriteLine();
-        Console.WriteLine("--- Test 4 : valeur du stock ---");
 
-        Console.WriteLine(
-            $"Prix : {p1.Prix:F2} $"
-        );
+        /*
+         * MAUVAISE APPROCHE POUR Afficher() :
+         *
+         * foreach (Produit item in inventaire)
+         * {
+         *     if (item is ProduitElectronique)
+         *     {
+         *         ...
+         *     }
+         *     else if (item is ProduitAlimentaire)
+         *     {
+         *         ...
+         *     }
+         *     else if (item is ProduitLivre)
+         *     {
+         *         ...
+         *     }
+         * }
+         *
+         * Pourquoi c'est mauvais ici ?
+         *
+         * Parce que chaque fois qu'on ajoute une nouvelle sous-classe,
+         * il faut modifier cette boucle.
+         *
+         * Le polymorphisme permet plutôt :
+         *
+         * item.Afficher();
+         */
 
-        Console.WriteLine(
-            $"Quantité : {p1.Quantite}"
-        );
 
-        Console.WriteLine(
-            $"Valeur du stock : {p1.ValeurStock():F2} $"
-        );
-
-        // 49.99 × 3 = 149.97
+        foreach (Produit item in inventaire)
+        {
+            item.Afficher();
+            Console.WriteLine();
+        }
 
 
-        // =========================================================
-        // TEST 5 : VÉRIFIER NbProduits
-        // =========================================================
+        // ========================================================
+        // TEST 7 - is POUR UN BESOIN SPÉCIAL
+        // ========================================================
 
-        Console.WriteLine();
-        Console.WriteLine("--- Test 5 : nombre de produits ---");
+        Titre("TEST 7 - is pour un cas spécial");
 
-        Console.WriteLine(
-            $"NbProduits = {Produit.NbProduits}"
-        );
 
-        // Résultat attendu :
-        // 1
+        foreach (Produit item in inventaire)
+        {
+            /*
+             * Afficher() ne nécessite PAS de is.
+             *
+             * Mais imaginons que nous voulions appeler
+             * AfficherGarantie().
+             *
+             * Cette méthode existe seulement
+             * dans ProduitElectronique.
+             */
+
+            if (item is ProduitElectronique e)
+            {
+                e.AfficherGarantie();
+            }
+        }
+
+
+        // ========================================================
+        // TEST 8 - as ET CONVERSION
+        // ========================================================
+
+        Titre("TEST 8 - as");
+
+
+        Produit produitGeneral = alimentaire;
+
+
+        // On essaie de convertir un ProduitAlimentaire
+        // en ProduitElectronique.
         //
-        // Pourquoi ?
-        //
-        // Produit p2 = p1;
-        //
-        // n'a PAS créé un nouveau Produit.
-        // Aucun constructeur n'a été appelé.
+        // Cette conversion est impossible.
+
+        ProduitElectronique? e2 =
+            produitGeneral as ProduitElectronique;
 
 
-        // =========================================================
-        // TEST 6 : CRÉER UN VRAI DEUXIÈME OBJET
-        // =========================================================
+        if (e2 == null)
+        {
+            Console.WriteLine(
+                "Conversion impossible."
+            );
 
-        Console.WriteLine();
-        Console.WriteLine("--- Test 6 : nouvel objet ---");
+            Console.WriteLine(
+                "L'objet réel est un ProduitAlimentaire."
+            );
+        }
 
-        Produit p3 = new Produit(
-            "Souris",
-            29.99,
-            5
-        );
 
-        Console.WriteLine($"Nom      : {p3.Nom}");
-        Console.WriteLine($"Prix     : {p3.Prix:F2} $");
-        Console.WriteLine($"Quantité : {p3.Quantite}");
+        /*
+         * Tous les ProduitElectronique sont des Produit.
+         *
+         * MAIS
+         *
+         * tous les Produit ne sont pas
+         * des ProduitElectronique.
+         */
+
+
+        // ========================================================
+        // TEST 9 - COPIE DE RÉFÉRENCE
+        // ========================================================
+
+        Titre("TEST 9 - Copie de référence");
+
+
+        Produit reference1 = electronique;
+
+        Produit reference2 = reference1;
+
+
+        // Les deux variables pointent vers le même objet.
+
+        reference2.Quantite = 2;
+
 
         Console.WriteLine(
-            $"Valeur du stock : {p3.ValeurStock():F2} $"
-        );
-
-
-        Console.WriteLine(
-            $"Nombre de produits créés : {Produit.NbProduits}"
-        );
-
-        // Résultat attendu :
-        // 2
-        //
-        // Cette fois, new Produit(...) a appelé le constructeur.
-
-
-        // =========================================================
-        // TEST 7 : DEUX OBJETS INDÉPENDANTS
-        // =========================================================
-
-        Console.WriteLine();
-        Console.WriteLine("--- Test 7 : objets indépendants ---");
-
-        // p1 et p3 sont deux objets différents.
-
-        p3.Quantite = 20;
-
-        Console.WriteLine(
-            $"Quantité de p1 : {p1.Quantite}"
+            $"Quantité avec reference1 : {reference1.Quantite}"
         );
 
         Console.WriteLine(
-            $"Quantité de p3 : {p3.Quantite}"
+            $"Quantité avec reference2 : {reference2.Quantite}"
         );
 
-        // Modifier p3 ne modifie pas p1.
+        Console.WriteLine(
+            $"Quantité avec electronique : {electronique.Quantite}"
+        );
 
 
-        // =========================================================
-        // TEST 8 : VALIDATION DU PRIX
-        // =========================================================
+        /*
+         * Résultat :
+         *
+         * 2
+         * 2
+         * 2
+         *
+         * Pourquoi ?
+         *
+         * reference2 = reference1
+         *
+         * ne copie pas l'objet.
+         *
+         * Cela copie la référence.
+         */
 
-        Console.WriteLine();
-        Console.WriteLine("--- Test 8 : validation du prix ---");
+
+        // ========================================================
+        // TEST 10 - VALIDATION HÉRITÉE
+        // ========================================================
+
+        Titre("TEST 10 - Validation héritée");
+
 
         try
         {
-            Produit produitInvalide = new Produit(
-                "Écran",
-                -200,
-                4
-            );
+            ProduitElectronique invalide =
+                new ProduitElectronique(
+                    "",
+                    100,
+                    5,
+                    12
+                );
         }
         catch (ArgumentException erreur)
         {
             Console.WriteLine(
-                $"Erreur : {erreur.Message}"
+                $"Erreur détectée : {erreur.Message}"
             );
         }
 
 
-        // =========================================================
-        // TEST 9 : VALIDATION DE LA QUANTITÉ
-        // =========================================================
+        /*
+         * ProduitElectronique appelle :
+         *
+         * base(nom, prix, quantite)
+         *
+         * Donc les validations de Produit
+         * sont aussi utilisées lorsque nous créons
+         * un ProduitElectronique.
+         */
 
-        Console.WriteLine();
-        Console.WriteLine("--- Test 9 : validation de la quantité ---");
 
-        try
+        // ========================================================
+        // TEST 11 - AJOUTER UNE NOUVELLE SOUS-CLASSE
+        // ========================================================
+
+        Titre("TEST 11 - Extensibilité");
+
+
+        Console.WriteLine(
+            "Nous avons ajouté ProduitLivre."
+        );
+
+        Console.WriteLine(
+            "Pourtant, la boucle polymorphe n'a pas changé."
+        );
+
+
+        Produit[] inventaire2 =
         {
-            p1.Quantite = -5;
-        }
-        catch (ArgumentException erreur)
+            new ProduitElectronique(
+                "Télévision",
+                899.99,
+                3,
+                36
+            ),
+
+            new ProduitAlimentaire(
+                "Lait",
+                4.49,
+                15,
+                new DateTime(2026, 9, 20)
+            ),
+
+            new ProduitLivre(
+                "C# pour débutants",
+                39.99,
+                6,
+                "Marie Tremblay"
+            )
+        };
+
+
+        foreach (Produit item in inventaire2)
         {
-            Console.WriteLine(
-                $"Erreur : {erreur.Message}"
-            );
+            Console.WriteLine();
+
+            item.Afficher();
         }
 
 
-        // =========================================================
-        // TEST 10 : VALIDATION DU NOM
-        // =========================================================
-
-        Console.WriteLine();
-        Console.WriteLine("--- Test 10 : validation du nom ---");
-
-        try
-        {
-            Produit produitSansNom = new Produit(
-                "",
-                10,
-                2
-            );
-        }
-        catch (ArgumentException erreur)
-        {
-            Console.WriteLine(
-                $"Erreur : {erreur.Message}"
-            );
-        }
-
-
-        // =========================================================
+        // ========================================================
         // FIN
-        // =========================================================
+        // ========================================================
 
+        Titre("FIN DU LABO");
+    }
+
+
+    // ============================================================
+    // MÉTHODE UTILITAIRE
+    // ============================================================
+    //
+    // Elle sert seulement à rendre l'affichage console plus clair.
+
+    private static void Titre(string texte)
+    {
         Console.WriteLine();
-        Console.WriteLine("=================================");
-        Console.WriteLine("          FIN DU LABO");
-        Console.WriteLine("=================================");
+        Console.WriteLine(
+            "================================================="
+        );
+
+        Console.WriteLine(texte);
+
+        Console.WriteLine(
+            "================================================="
+        );
     }
 }
